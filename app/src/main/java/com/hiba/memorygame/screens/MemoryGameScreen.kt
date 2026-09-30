@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -32,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.hiba.memorygame.size.BoardSize
 import com.hiba.memorygame.utils.DEFAULT_ICONS
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,14 +61,19 @@ colors = TopAppBarDefaults.topAppBarColors(
             BoxWithConstraints(
                 modifier = Modifier.weight(1f).padding(18.dp)
             ) {
-                val columns=4
-                val rows=6
+                val boardSize: BoardSize= BoardSize.Hard
+                val columns=boardSize.numOfColumns
+                val rows=boardSize.getNumOfRows()
                 val spacing=12.dp
                 val cellWidth=(maxWidth-spacing*(columns-1))/columns
                 val cellHeight=(maxHeight-spacing * (rows-1))/rows
-val horizontalSpacing=spacing
+val horizontalSpacing=when(boardSize){
+    BoardSize.Easy->spacing*4
+    BoardSize.Medium->spacing*2
+    BoardSize.Hard->spacing
+}
 
-                val resourceImages=DEFAULT_ICONS.shuffled()
+                val resourceImages=DEFAULT_ICONS.shuffled().take(boardSize.numCards)
                 val randomizedImages=(resourceImages+resourceImages).shuffled()
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(columns),
