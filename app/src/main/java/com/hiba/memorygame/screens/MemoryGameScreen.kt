@@ -26,6 +26,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
@@ -33,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.hiba.memorygame.components.MemoryCard
 import com.hiba.memorygame.size.BoardSize
 import com.hiba.memorygame.utils.DEFAULT_ICONS
 
@@ -52,7 +56,7 @@ colors = TopAppBarDefaults.topAppBarColors(
 }
 
     ){innerPadding->
-
+//padding values are provided by scaffold-scaffold calculates itself
 
         Column(
             modifier = Modifier.fillMaxSize().padding(innerPadding)
@@ -65,16 +69,28 @@ colors = TopAppBarDefaults.topAppBarColors(
                 val columns=boardSize.numOfColumns
                 val rows=boardSize.getNumOfRows()
                 val spacing=12.dp
+//                maxWidth/ maxHeight -gives height and width of boxWithConstraints
                 val cellWidth=(maxWidth-spacing*(columns-1))/columns
                 val cellHeight=(maxHeight-spacing * (rows-1))/rows
+
 val horizontalSpacing=when(boardSize){
     BoardSize.Easy->spacing*4
     BoardSize.Medium->spacing*2
     BoardSize.Hard->spacing
 }
+val memoryCards= remember(boardSize){
+    // randomizedImage is recreated during recomposition- if recomposes we can get a new randomized list
+    val resourceImages=DEFAULT_ICONS.shuffled().take(boardSize.numCards)
+    val randomizedImages=(resourceImages+resourceImages).shuffled()
+    mutableStateListOf<MemoryCard>().apply{
+        addAll(
+            randomizedImages.map{
+                MemoryCard(it)
+            }
+        )
+    }
+}
 
-                val resourceImages=DEFAULT_ICONS.shuffled().take(boardSize.numCards)
-                val randomizedImages=(resourceImages+resourceImages).shuffled()
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(columns),
                     userScrollEnabled = false,
@@ -92,7 +108,7 @@ horizontalArrangement = Arrangement.spacedBy(horizontalSpacing),
                             ),
                         colors = CardDefaults.cardColors(containerColor = cardColor)
                     ) {
-                        Image(painter = painterResource(randomizedImages[i]),
+                        Image(painter = painterResource(memoryCards[i].cardIndex),
                             contentDescription = null,
                             contentScale = ContentScale.Fit,
                             modifier=Modifier.fillMaxSize()
